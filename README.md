@@ -14,6 +14,14 @@ From their last [announcement](https://www.bose.com/soundtouch-end-of-life):
 
 This projects helps you overcome these limitations with a self-hosted server that replaces the Bose streaming HTTP API.
 
+> **Fork notice:** This repository is a fork of [julius-d/ueberboese-api](https://github.com/julius-d/ueberboese-api) with the following additions:
+>
+> - **Browser-based preset management UI** — manage all 6 preset buttons from any browser (including iOS Safari). Search TuneIn stations, view station artwork, play, save and remove presets without needing the native app. Served at `http://<your-api>:8080/presets.html`.
+>
+>   ![Überböse Preset UI](docs/images/preset-web-ui.png)
+>
+> - **Never-paired / factory-reset device support** — speakers that never had a Bose account (or were factory-reset after May 2026) are automatically provisioned on first boot. The API calls `POST /setMargeAccount` on the speaker and returns a valid account so TuneIn sources load immediately, without USB stick or manual SSH.
+
 ## Documentation
 
 **Full documentation is available at: https://julius-d.github.io/ueberboese-api/**
