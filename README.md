@@ -14,6 +14,8 @@ From their last [announcement](https://www.bose.com/soundtouch-end-of-life):
 
 This projects helps you overcome these limitations with a self-hosted server that replaces the Bose streaming HTTP API.
 
+> **Fork notice:** This repository is a fork of [julius-d/ueberboese-api](https://github.com/julius-d/ueberboese-api).
+
 ## Documentation
 
 **Full documentation is available at: https://julius-d.github.io/ueberboese-api/**
