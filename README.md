@@ -14,13 +14,23 @@ From their last [announcement](https://www.bose.com/soundtouch-end-of-life):
 
 This projects helps you overcome these limitations with a self-hosted server that replaces the Bose streaming HTTP API.
 
-> **Fork notice:** This repository is a fork of [julius-d/ueberboese-api](https://github.com/julius-d/ueberboese-api) with the following additions:
->
-> - **Browser-based preset management UI** — manage all 6 preset buttons from any browser (including iOS Safari). Search TuneIn stations, view station artwork, play, save and remove presets without needing the native app. Served at `http://<your-api>:8080/presets.html`.
->
->   ![Überböse Preset UI](docs/images/preset-web-ui.png)
->
-> - **Never-paired / factory-reset device support** — speakers that never had a Bose account (or were factory-reset after May 2026) are automatically provisioned on first boot. The API calls `POST /setMargeAccount` on the speaker and returns a valid account so TuneIn sources load immediately, without USB stick or manual SSH.
+---
+
+## ✨ This Fork
+
+> This is a fork of [julius-d/ueberboese-api](https://github.com/julius-d/ueberboese-api) with two additional features not yet in the upstream repo:
+
+### Browser-based Preset Management UI
+
+Manage all 6 preset buttons from any browser — including iOS Safari — without needing the native app. Search TuneIn stations, view station artwork, play, save and remove presets. Served at `http://<your-api>:8080/presets.html`.
+
+![Überböse Preset UI](docs/images/preset-web-ui.png)
+
+### Never-paired / Factory-reset Device Support
+
+Speakers that never had a Bose account, or were factory-reset after the May 2026 shutdown, are **automatically provisioned on first boot**. The API calls `POST /setMargeAccount` on the speaker so TuneIn sources load immediately — no USB stick or manual SSH required.
+
+---
 
 ## Documentation
 
