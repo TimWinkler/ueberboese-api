@@ -64,6 +64,43 @@ This has been tested on:
 
 See the [Quick Start Guide](https://julius-d.github.io/ueberboese-api/quick-start).
 
+### Docker Compose
+
+```yaml
+services:
+  ueberboese-api:
+    image: ghcr.io/julius-d/ueberboese-api:latest
+    ports:
+      - "8080:8080"
+      - "8081:8081"
+    volumes:
+      - ./data:/data
+    environment:
+      UEBERBOESE_BMX_BASE_URL: "http://<your-server-ip>:8080"
+      UEBERBOESE_MGMT_USERNAME: "admin"
+      UEBERBOESE_MGMT_PASSWORD: "change_me!"
+    restart: unless-stopped
+```
+
+Replace `<your-server-ip>` with the IP address your speakers can reach.
+
+### Building from Source
+
+**Prerequisites:** Java 21, Maven 3.6+
+
+```bash
+# Generate OpenAPI sources and run
+mvn generate-sources
+mvn spring-boot:run
+
+# Or build a local Docker image
+mvn spring-boot:build-image
+docker run -p 8080:8080 -p 8081:8081 \
+  -e UEBERBOESE_BMX_BASE_URL=http://<your-server-ip>:8080 \
+  -v ./data:/data \
+  ueberboese-api:0.0.1-SNAPSHOT
+```
+
 ## Researching the API
 
 When running and using this Docker image, the log file folder will collect all requests that are made.
