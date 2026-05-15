@@ -22,7 +22,7 @@ This projects helps you overcome these limitations with a self-hosted server tha
 
 ### Browser-based Preset Management UI
 
-Manage all 6 preset buttons from any browser — including iOS Safari — without needing the native app. Search TuneIn stations, view station artwork, play, save and remove presets. Served at `http://<your-api>:8080/presets.html`.
+Manage all 6 preset buttons from any browser without needing the native app. Search TuneIn stations, view station artwork, play, save and remove presets. Served at `http://<your-api>:8080/presets.html`.
 
 ![Überböse Preset UI](docs/images/preset-web-ui.png)
 
