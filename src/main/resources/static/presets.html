@@ -331,13 +331,10 @@
 
       msgEl.textContent = 'Saving…'; msgEl.className = 'msg';
 
-      // Push to speaker: select the station, then save it to the preset button.
-      // storePreset fails for long URLs; select+key is how the original SoundTouch app works.
-      await speakerPost('/select', speakerXml);
-      await new Promise(r => setTimeout(r, 1500));
-      await speakerPost('/key', `<key state="press" sender="Gabbo">PRESET_${n}</key>`);
-      await new Promise(r => setTimeout(r, 300));
-      await speakerPost('/key', `<key state="release" sender="Gabbo">PRESET_${n}</key>`);
+      // Reload the speaker's account so it picks up the new preset immediately.
+      // setMargeAccount causes the speaker to re-fetch account/full from the API.
+      await speakerPost('/setMargeAccount',
+        `<PairDeviceWithAccount><accountId>${accountId}</accountId><userAuthToken>SoundTouchHybrid</userAuthToken></PairDeviceWithAccount>`);
 
       // Save to Überböse API DB
       // sourceid=1 → TuneIn, sourceid=2 → LOCAL_INTERNET_RADIO
