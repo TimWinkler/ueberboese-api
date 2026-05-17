@@ -1,5 +1,6 @@
 package com.github.juliusd.ueberboeseapi.preset;
 
+import com.github.juliusd.ueberboeseapi.SourceProvider;
 import com.github.juliusd.ueberboeseapi.generated.dtos.CredentialApiDto;
 import com.github.juliusd.ueberboeseapi.generated.dtos.PresetApiDto;
 import com.github.juliusd.ueberboeseapi.generated.dtos.PresetsContainerApiDto;
@@ -59,13 +60,22 @@ public class PresetMapper {
       source.setSourceproviderid("15");
       source.setSourcename("user1@example.org");
       source.setUsername("user1namespot");
-    } else if ("19989342".equals(preset.sourceId())) {
+    } else if ("19989342".equals(preset.sourceId()) || "1".equals(preset.sourceId())) {
       // TuneIn source
       credential.setType("token");
       credential.setValue("eyJduTune=");
       source.setCredential(credential);
       source.setName("");
       source.setSourceproviderid("25");
+      source.setSourcename("");
+      source.setUsername("");
+    } else if ("2".equals(preset.sourceId())) {
+      // LOCAL_INTERNET_RADIO source (direct stream)
+      credential.setType("token");
+      credential.setValue("local");
+      source.setCredential(credential);
+      source.setName("");
+      source.setSourceproviderid(String.valueOf(SourceProvider.LOCAL_INTERNET_RADIO.getId()));
       source.setSourcename("");
       source.setUsername("");
     } else {
