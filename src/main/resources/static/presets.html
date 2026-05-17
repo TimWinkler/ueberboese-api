@@ -334,8 +334,16 @@
 
       msgEl.textContent = 'Saving…'; msgEl.className = 'msg';
 
-      // Reload the speaker's account. Use application/x-www-form-urlencoded (CORS-safe)
-      // so the Content-Type header is actually sent in no-cors mode.
+      // 1. Save to DB FIRST
+      const sourceid = type === 'radio' ? '2' : '1';
+      const apiBody = `<?xml version="1.0" encoding="UTF-8"?><preset buttonNumber="${n}"><sourceid>${sourceid}</sourceid><name>${esc(name)}</name><username>${esc(name)}</username><location>${esc(location)}</location><contentItemType>${contentItemType}</contentItemType><containerArt>${esc(art)}</containerArt></preset>`;
+      await fetch(`/streaming/account/${accountId}/device/${deviceId}/preset/${n}`, {
+        method:'PUT',
+        headers:{'Content-Type':'application/vnd.bose.streaming-v1.2+xml'},
+        body: apiBody
+      });
+
+      // 2. THEN reload the speaker so it fetches the updated DB preset
       const margeXml = `<PairDeviceWithAccount><accountId>${accountId}</accountId><userAuthToken>SoundTouchHybrid</userAuthToken></PairDeviceWithAccount>`;
       await fetch(`http://${speakerIp}:8090/setMargeAccount`, {
         method: 'POST', mode: 'no-cors',
@@ -344,16 +352,6 @@
       }).catch(() => {});
       msgEl.textContent = 'Reloading speaker…'; msgEl.className = 'msg';
       await new Promise(r => setTimeout(r, 5000));
-
-      // Save to Überböse API DB
-      // sourceid=1 → TuneIn, sourceid=2 → LOCAL_INTERNET_RADIO
-      const sourceid = type === 'radio' ? '2' : '1';
-      const apiBody = `<?xml version="1.0" encoding="UTF-8"?><preset buttonNumber="${n}"><sourceid>${sourceid}</sourceid><name>${esc(name)}</name><username>${esc(name)}</username><location>${esc(location)}</location><contentItemType>${contentItemType}</contentItemType><containerArt>${esc(art)}</containerArt></preset>`;
-      await fetch(`/streaming/account/${accountId}/device/${deviceId}/preset/${n}`, {
-        method:'PUT',
-        headers:{'Content-Type':'application/vnd.bose.streaming-v1.2+xml'},
-        body: apiBody
-      });
 
       msgEl.textContent = '✓ Saved'; msgEl.className = 'msg ok';
       setTimeout(() => { msgEl.textContent = ''; }, 2000);
