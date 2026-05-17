@@ -310,6 +310,12 @@
       const art = document.getElementById('art-' + n).value.trim();
       const msgEl = document.getElementById('msg-' + n);
 
+      // Confirm overwrite if slot is already occupied
+      if (currentPresets[n]) {
+        const current = currentPresets[n].name || `Preset ${n}`;
+        if (!confirm(`Replace "${current}" with "${name || 'this station'}"?`)) return;
+      }
+
       let location, contentItemType, speakerXml;
 
       if (type === 'tunein') {
