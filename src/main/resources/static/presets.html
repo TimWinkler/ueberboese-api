@@ -322,7 +322,10 @@
       } else {
         const url = document.getElementById('url-' + n).value.trim();
         if (!url) { msgEl.textContent = 'Enter a stream URL'; msgEl.className = 'msg err'; return; }
-        const encoded = btoa(JSON.stringify({ name, imageUrl: art, streamUrl: url }));
+        // Decode proxy URL back to original CDN URL for the speaker's JSON data
+        const rawArt = art.startsWith('/speaker-proxy/image?url=')
+          ? decodeURIComponent(art.replace('/speaker-proxy/image?url=', '')) : art;
+        const encoded = btoa(JSON.stringify({ name, imageUrl: rawArt, streamUrl: url }));
         // Location is relative to BMX base URL — just /station?data=...
         location = `/station?data=${encoded}`;
         contentItemType = 'stationurl';
