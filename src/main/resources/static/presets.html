@@ -268,20 +268,16 @@
       const typeEl = document.getElementById('type-' + n);
       if (typeEl) { typeEl.value = 'radio'; onTypeChange(n); }
       document.getElementById('url-' + n).value = streamUrl;
-      if (name && !document.getElementById('name-' + n).value)
-        document.getElementById('name-' + n).value = name;
-      if (imageUrl && !document.getElementById('art-' + n).value)
-        document.getElementById('art-' + n).value = imageUrl;
+      if (name) document.getElementById('name-' + n).value = name;
+      if (imageUrl) document.getElementById('art-' + n).value = imageUrl;
       document.getElementById('results-' + n).style.display = 'none';
       document.getElementById('search-' + n).value = '';
     }
 
     function pickStation(n, stationId, name, imageUrl) {
       document.getElementById('sid-' + n).value = stationId;
-      if (name && !document.getElementById('name-' + n).value)
-        document.getElementById('name-' + n).value = name;
-      if (imageUrl && !document.getElementById('art-' + n).value)
-        document.getElementById('art-' + n).value = imageUrl;
+      if (name) document.getElementById('name-' + n).value = name;
+      if (imageUrl) document.getElementById('art-' + n).value = imageUrl;
       document.getElementById('results-' + n).style.display = 'none';
       document.getElementById('search-' + n).value = '';
     }
@@ -327,18 +323,26 @@
         const url = document.getElementById('url-' + n).value.trim();
         if (!url) { msgEl.textContent = 'Enter a stream URL'; msgEl.className = 'msg err'; return; }
         const encoded = btoa(JSON.stringify({ name, imageUrl: art, streamUrl: url }));
-        location = `/core02/svc-bmx-adapter-orion/prod/orion/station?data=${encoded}`;
+        // Location is relative to BMX base URL — just /station?data=...
+        location = `/station?data=${encoded}`;
         contentItemType = 'stationurl';
         speakerXml = `<ContentItem source="LOCAL_INTERNET_RADIO" type="stationurl" location="${location}" sourceAccount="" isPresetable="true"><itemName>${esc(name)}</itemName></ContentItem>`;
       }
 
       msgEl.textContent = 'Saving…'; msgEl.className = 'msg';
 
-      // Push to speaker directly (no-cors, fire-and-forget)
-      await speakerPost('/storePreset', `<preset buttonNumber="${n}">${speakerXml}</preset>`);
+      // Push to speaker: select the station, then save it to the preset button.
+      // storePreset fails for long URLs; select+key is how the original SoundTouch app works.
+      await speakerPost('/select', speakerXml);
+      await new Promise(r => setTimeout(r, 1500));
+      await speakerPost('/key', `<key state="press" sender="Gabbo">PRESET_${n}</key>`);
+      await new Promise(r => setTimeout(r, 300));
+      await speakerPost('/key', `<key state="release" sender="Gabbo">PRESET_${n}</key>`);
 
       // Save to Überböse API DB
-      const apiBody = `<?xml version="1.0" encoding="UTF-8"?><preset buttonNumber="${n}"><sourceid>1</sourceid><name>${esc(name)}</name><username>${esc(name)}</username><location>${esc(location)}</location><contentItemType>${contentItemType}</contentItemType><containerArt>${esc(art)}</containerArt></preset>`;
+      // sourceid=1 → TuneIn, sourceid=2 → LOCAL_INTERNET_RADIO
+      const sourceid = type === 'radio' ? '2' : '1';
+      const apiBody = `<?xml version="1.0" encoding="UTF-8"?><preset buttonNumber="${n}"><sourceid>${sourceid}</sourceid><name>${esc(name)}</name><username>${esc(name)}</username><location>${esc(location)}</location><contentItemType>${contentItemType}</contentItemType><containerArt>${esc(art)}</containerArt></preset>`;
       await fetch(`/streaming/account/${accountId}/device/${deviceId}/preset/${n}`, {
         method:'PUT',
         headers:{'Content-Type':'application/vnd.bose.streaming-v1.2+xml'},
