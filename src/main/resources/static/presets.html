@@ -332,9 +332,11 @@
       msgEl.textContent = 'Saving…'; msgEl.className = 'msg';
 
       // Reload the speaker's account so it picks up the new preset immediately.
-      // setMargeAccount causes the speaker to re-fetch account/full from the API.
       await speakerPost('/setMargeAccount',
         `<PairDeviceWithAccount><accountId>${accountId}</accountId><userAuthToken>SoundTouchHybrid</userAuthToken></PairDeviceWithAccount>`);
+      // Wait for the speaker to re-fetch its account before the user presses the button
+      msgEl.textContent = 'Reloading speaker…'; msgEl.className = 'msg';
+      await new Promise(r => setTimeout(r, 5000));
 
       // Save to Überböse API DB
       // sourceid=1 → TuneIn, sourceid=2 → LOCAL_INTERNET_RADIO
