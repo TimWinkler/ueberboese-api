@@ -38,10 +38,7 @@ public class SpeakerProxyController {
   @GetMapping("/image")
   public ResponseEntity<byte[]> proxyImage(@RequestParam String url) {
     try {
-      // Allow TuneIn CDNs and any HTTPS favicon from radio-browser.info stations
-      boolean isTuneIn = url.contains("tunein.com");
-      boolean isHttps = url.startsWith("https://");
-      if (!isTuneIn && !isHttps) {
+      if (!url.startsWith("http://") && !url.startsWith("https://")) {
         return ResponseEntity.badRequest().build();
       }
       byte[] image =
