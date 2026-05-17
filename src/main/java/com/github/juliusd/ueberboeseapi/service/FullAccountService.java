@@ -344,6 +344,14 @@ public class FullAccountService {
             .updatedOn(OffsetDateTime.parse("2019-07-20T17:48:31+00:00"))
             .sourceproviderid(SourceProvider.TUNEIN.getId() + "")
             .credential(new CredentialApiDto("token", "eyJduTune=")));
+    sources.addSourceItem(
+        new SourceApiDto()
+            .id("2")
+            .type("Audio")
+            .createdOn(OffsetDateTime.parse("2018-08-11T08:55:41+00:00"))
+            .updatedOn(OffsetDateTime.parse("2019-07-20T17:48:31+00:00"))
+            .sourceproviderid(SourceProvider.LOCAL_INTERNET_RADIO.getId() + "")
+            .credential(new CredentialApiDto("token", "local")));
     response.setSources(sources);
     return response;
   }

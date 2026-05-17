@@ -25,6 +25,16 @@ public class BmxController implements BmxApi {
 
   private final BmxService bmxService;
 
+  /** Orion (LOCAL_INTERNET_RADIO) token — issue an anonymous token, same pattern as TuneIn. */
+  @org.springframework.web.bind.annotation.PostMapping(
+      "/core02/svc-bmx-adapter-orion/prod/orion/token")
+  public ResponseEntity<String> orionToken() {
+    String token = java.util.UUID.randomUUID().toString();
+    return ResponseEntity.ok()
+        .header("Content-Type", "application/json")
+        .body("{\"access_token\":\"" + token + "\"}");
+  }
+
   @Override
   public ResponseEntity<BmxServicesResponseApiDto> getBmxServices() {
     log.info("Getting BMX services registry");
