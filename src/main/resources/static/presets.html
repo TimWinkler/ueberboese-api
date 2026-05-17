@@ -183,7 +183,7 @@
             </div>
           </div>
           <div class="search-row" id="search-row-${n}">
-            <input id="search-${n}" placeholder="Search TuneIn…" onkeydown="if(event.key==='Enter')doSearch(${n})">
+            <input id="search-${n}" placeholder="Search stations (radio-browser.info)…" onkeydown="if(event.key==='Enter')doSearch(${n})">
             <button onclick="doSearch(${n})">Search</button>
           </div>
           <div class="results" id="results-${n}"></div>
@@ -239,26 +239,41 @@
       res.innerHTML = '<div class="result-item"><span style="color:#888;font-size:0.83rem">Searching…</span></div>';
       res.style.display = 'block';
       try {
-        const data = await fetch('/speaker-proxy/tunein-search?q=' + encodeURIComponent(q)).then(r => r.json());
-        const items = (data.body || []).filter(i => i.type === 'audio' || i.item === 'station');
-        if (!items.length) {
+        const items = await fetch('/speaker-proxy/radio-search?q=' + encodeURIComponent(q)).then(r => r.json());
+        // Filter to MP3/AAC streams only (skip HLS .m3u8 playlists)
+        const playable = items.filter(i => i.url_resolved && !i.url_resolved.endsWith('.m3u8'));
+        if (!playable.length) {
           res.innerHTML = '<div class="result-item"><span style="color:#888;font-size:0.83rem">No results</span></div>';
           return;
         }
-        res.innerHTML = items.slice(0, 15).map(item => {
-          const sid = (item.guide_id || item.preset_id || '').replace(/^s/,'');
-          const name = esc(item.text || '');
-          const sub = esc(item.subtext || item.formats || '');
-          const img = item.image ? `<img src="${esc(httpsImg(item.image))}" onerror="this.remove()">` : '';
-          const safeName = (item.text||'').replace(/\\/g,'\\\\').replace(/'/g,"\\'");
-          const safeImg  = httpsImg(item.image||'').replace(/\\/g,'\\\\').replace(/'/g,"\\'");
-          return `<div class="result-item" onclick="pickStation(${n},'s${sid}','${safeName}','${safeImg}')">
+        res.innerHTML = playable.slice(0, 20).map(item => {
+          const name = esc(item.name || '');
+          const sub = esc([item.country, item.codec, item.bitrate ? item.bitrate + ' kbps' : ''].filter(Boolean).join(' · '));
+          const favicon = item.favicon ? httpsImg(item.favicon) : '';
+          const img = favicon ? `<img src="${esc(favicon)}" onerror="this.remove()">` : '';
+          const safeUrl = (item.url_resolved||'').replace(/\\/g,'\\\\').replace(/'/g,"\\'");
+          const safeName = (item.name||'').replace(/\\/g,'\\\\').replace(/'/g,"\\'");
+          const safeFavicon = favicon.replace(/\\/g,'\\\\').replace(/'/g,"\\'");
+          return `<div class="result-item" onclick="pickRadioStation(${n},'${safeUrl}','${safeName}','${safeFavicon}')">
             ${img}<div><div class="r-name">${name}</div><div class="r-sub">${sub}</div></div>
           </div>`;
         }).join('');
       } catch(e) {
         res.innerHTML = `<div class="result-item"><span style="color:#f87171;font-size:0.83rem">Error: ${e.message}</span></div>`;
       }
+    }
+
+    function pickRadioStation(n, streamUrl, name, imageUrl) {
+      // Switch to "Internet radio URL" type and fill the direct stream URL
+      const typeEl = document.getElementById('type-' + n);
+      if (typeEl) { typeEl.value = 'radio'; onTypeChange(n); }
+      document.getElementById('url-' + n).value = streamUrl;
+      if (name && !document.getElementById('name-' + n).value)
+        document.getElementById('name-' + n).value = name;
+      if (imageUrl && !document.getElementById('art-' + n).value)
+        document.getElementById('art-' + n).value = imageUrl;
+      document.getElementById('results-' + n).style.display = 'none';
+      document.getElementById('search-' + n).value = '';
     }
 
     function pickStation(n, stationId, name, imageUrl) {
@@ -339,10 +354,11 @@
       return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
     }
 
-    // Proxy TuneIn CDN images through the API to avoid ad-blocker blocks
+    // Proxy external images through the API to avoid ad-blocker blocks
     function httpsImg(url) {
       if (!url) return '';
-      if (url.includes('tunein.com')) return '/speaker-proxy/image?url=' + encodeURIComponent(url);
+      if (url.startsWith('http://') || url.startsWith('https://'))
+        return '/speaker-proxy/image?url=' + encodeURIComponent(url);
       return url;
     }
 

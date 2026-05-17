@@ -24,6 +24,9 @@ public class SpeakerProxyController {
   private static final String TUNEIN_SEARCH_URL =
       "http://opml.radiotime.com/Search.ashx?query=%s&formats=mp3&render=json";
   private static final String TUNEIN_BROWSE_URL = "http://opml.radiotime.com/?render=json";
+  private static final String RADIO_BROWSER_SEARCH_URL =
+      "https://de1.api.radio-browser.info/json/stations/search"
+          + "?name=%s&limit=30&order=clickcount&reverse=true&hidebroken=true";
   private static final String TUNEIN_USER_AGENT =
       "Mozilla/5.0 (compatible; SoundTouch/27.0; +https://github.com/julius-d/ueberboese-api)";
 
@@ -35,12 +38,10 @@ public class SpeakerProxyController {
   @GetMapping("/image")
   public ResponseEntity<byte[]> proxyImage(@RequestParam String url) {
     try {
-      if (!url.startsWith("http://cdn-profiles.tunein.com")
-          && !url.startsWith("https://cdn-profiles.tunein.com")
-          && !url.startsWith("http://cdn-radiotime-logos.tunein.com")
-          && !url.startsWith("https://cdn-radiotime-logos.tunein.com")
-          && !url.startsWith("http://cdn-albums.tunein.com")
-          && !url.startsWith("https://cdn-albums.tunein.com")) {
+      // Allow TuneIn CDNs and any HTTPS favicon from radio-browser.info stations
+      boolean isTuneIn = url.contains("tunein.com");
+      boolean isHttps = url.startsWith("https://");
+      if (!isTuneIn && !isHttps) {
         return ResponseEntity.badRequest().build();
       }
       byte[] image =
@@ -70,6 +71,28 @@ public class SpeakerProxyController {
     } catch (Exception e) {
       log.warn("Could not fetch /info from {}: {}", ip, e.getMessage());
       return ResponseEntity.status(502).body("<error>" + e.getMessage() + "</error>");
+    }
+  }
+
+  @GetMapping("/radio-search")
+  public ResponseEntity<byte[]> radioSearch(@RequestParam String q) {
+    try {
+      String url =
+          String.format(
+              RADIO_BROWSER_SEARCH_URL,
+              java.net.URLEncoder.encode(q, java.nio.charset.StandardCharsets.UTF_8));
+      log.info("Radio-browser search: {}", url);
+      byte[] json =
+          restClient
+              .get()
+              .uri(url)
+              .header("User-Agent", TUNEIN_USER_AGENT)
+              .retrieve()
+              .body(byte[].class);
+      return ResponseEntity.ok().header("Content-Type", "application/json").body(json);
+    } catch (Exception e) {
+      log.warn("Radio-browser search error: {}", e.getMessage());
+      return ResponseEntity.status(502).body("[]".getBytes());
     }
   }
 
