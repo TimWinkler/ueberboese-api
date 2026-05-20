@@ -30,9 +30,6 @@ public class SpeakerProxyController {
   private static final String TUNEIN_USER_AGENT =
       "Mozilla/5.0 (compatible; SoundTouch/27.0; +https://github.com/julius-d/ueberboese-api)";
 
-  private static final String TUNEIN_USER_AGENT =
-      "Mozilla/5.0 (compatible; SoundTouch/27.0; +https://github.com/julius-d/ueberboese-api)";
-
   private final RestClient restClient = RestClient.create();
 
   @GetMapping("/image")
